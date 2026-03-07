@@ -28,60 +28,69 @@ def crear_frame_claude(titulo, subtitulo=None, elementos=None, numero=1):
     img = Image.new('RGB', (width, height), COLORS['bg_cream'])
     draw = ImageDraw.Draw(img)
     
-    # Fuentes MUY grandes para legibilidad móvil (casi pantalla completa)
+    # Fuentes ENORMES para legibilidad móvil (ocupar casi toda la pantalla)
     try:
-        font_titulo = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 200)  # ANTES: 140
-        font_sub = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 90)      # ANTES: 70
-        font_body = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 70)         # ANTES: 60
+        font_titulo = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 340)
+        font_sub = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 130)
+        font_body = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 110)
     except:
         font_titulo = ImageFont.load_default()
         font_sub = font_titulo
         font_body = font_titulo
     
-    # Header con número de segmento (pequeño, esquina)
-    draw.text((60, 60), f"0{numero}", fill=COLORS['orange'], font=font_body)
-    draw.line([(60, 140), (200, 140)], fill=COLORS['orange'], width=4)
-    
-    # Título principal GRANDE y centrado
-    # Dividir en líneas si es largo
+    # Header con número de segmento
+    draw.text((60, 50), f"0{numero}", fill=COLORS['orange'], font=font_sub)
+    draw.line([(60, 200), (280, 200)], fill=COLORS['orange'], width=8)
+
+    # Título principal ENORME y centrado
+    # Dividir en líneas cortas para que cada palabra sea grande
     palabras = titulo.split()
     lineas = []
     linea_actual = []
-    
+
     for palabra in palabras:
         linea_actual.append(palabra)
-        if len(' '.join(linea_actual)) > 12:  # Máx 12 chars por línea
+        if len(' '.join(linea_actual)) > 10:  # Máx 10 chars por línea
             lineas.append(' '.join(linea_actual[:-1]))
             linea_actual = [linea_actual[-1]]
     if linea_actual:
         lineas.append(' '.join(linea_actual))
-    
-    # Dibujar título (máx 2 líneas, más espaciado)
-    y_titulo = 500  # Más abajo para que quepa el texto grande
-    for i, linea in enumerate(lineas[:2]):
+
+    # Dibujar título centrado verticalmente
+    y_titulo = 300
+    for i, linea in enumerate(lineas[:3]):
         bbox = draw.textbbox((0, 0), linea, font=font_titulo)
         text_width = bbox[2] - bbox[0]
         x = (width - text_width) // 2
-        draw.text((x, y_titulo + i*240), linea, fill=COLORS['text_dark'], font=font_titulo)  # Más espacio entre líneas
-    
+        draw.text((x, y_titulo + i*380), linea, fill=COLORS['text_dark'], font=font_titulo)
+
     # Subtítulo
     if subtitulo:
-        y_sub = y_titulo + len(lineas)*240 + 150  # Más espacio
-        bbox = draw.textbbox((0, 0), subtitulo, font=font_sub)
-        text_width = bbox[2] - bbox[0]
-        x = (width - text_width) // 2
-        draw.text((x, y_sub), subtitulo, fill=COLORS['orange'], font=font_sub)
-    
-    # Elementos adicionales (iconos simples)
+        y_sub = y_titulo + len(lineas)*380 + 80
+        # Dividir subtítulo si es largo
+        if len(subtitulo) > 20:
+            partes = subtitulo.split(' · ') if ' · ' in subtitulo else [subtitulo]
+            for j, parte in enumerate(partes):
+                bbox = draw.textbbox((0, 0), parte, font=font_sub)
+                text_width = bbox[2] - bbox[0]
+                x = (width - text_width) // 2
+                draw.text((x, y_sub + j*160), parte, fill=COLORS['orange'], font=font_sub)
+        else:
+            bbox = draw.textbbox((0, 0), subtitulo, font=font_sub)
+            text_width = bbox[2] - bbox[0]
+            x = (width - text_width) // 2
+            draw.text((x, y_sub), subtitulo, fill=COLORS['orange'], font=font_sub)
+
+    # Elementos adicionales (más grandes, más espaciados)
     if elementos:
-        y_elem = 1000
+        y_elem = 1250
         for elem in elementos:
-            draw.text((100, y_elem), f"• {elem}", fill=COLORS['text_gray'], font=font_body)
-            y_elem += 120
-    
-    # Footer con branding
-    draw.text((60, height-150), "Claude", fill=COLORS['orange'], font=font_sub)
-    draw.text((300, height-150), "Code", fill=COLORS['text_gray'], font=font_sub)
+            draw.text((80, y_elem), f"• {elem}", fill=COLORS['text_gray'], font=font_body)
+            y_elem += 160
+
+    # Footer con branding (más grande)
+    draw.text((60, height-200), "Claude", fill=COLORS['orange'], font=font_sub)
+    draw.text((380, height-200), "Code", fill=COLORS['text_gray'], font=font_sub)
     
     return img
 

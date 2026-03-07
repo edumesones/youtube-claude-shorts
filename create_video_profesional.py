@@ -54,18 +54,25 @@ def crear_frame_gradiente(width=1080, height=1920, color1=(13, 17, 23), color2=(
 
 def crear_icono_claude(draw, x, y, size=80):
     """Dibuja icono hexagonal de Claude."""
+    import math
     # Hexágono naranja #E57035
     color = (229, 112, 53)
     points = []
     for i in range(6):
         angle = i * 60 - 30
-        import math
         px = x + size * 0.8 * math.cos(math.radians(angle))
         py = y + size * 0.8 * math.sin(math.radians(angle))
         points.append((px, py))
     draw.polygon(points, fill=color, outline=color)
-    # Letra C blanca
-    draw.text((x-20, y-25), "C", fill=(255,255,255), font=None)
+    # Letra C blanca centrada
+    try:
+        font_c = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", int(size * 0.8))
+    except:
+        font_c = None
+    bbox = draw.textbbox((0,0), "C", font=font_c)
+    cx = x - (bbox[2]-bbox[0])//2
+    cy = y - (bbox[3]-bbox[1])//2
+    draw.text((cx, cy), "C", fill=(255,255,255), font=font_c)
 
 def crear_icono_drive(draw, x, y, size=60):
     """Dibuja icono de Drive."""
@@ -84,67 +91,90 @@ def crear_frame_tutorial(num_frame, segmento, total_frames):
     img = crear_frame_gradiente()
     draw = ImageDraw.Draw(img)
     
-    # Fuente básica
+    # Fuentes grandes para legibilidad en móvil
     try:
-        font_title = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 60)
-        font_text = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 35)
+        font_title = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 120)
+        font_text = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", 70)
     except:
         font_title = ImageFont.load_default()
         font_text = font_title
     
     # SEGMENTO 1: Hook - Iconos grandes
     if segmento == 1:
-        crear_icono_drive(draw, 540, 500, 100)
-        crear_icono_claude(draw, 540, 700, 120)
-        draw.text((400, 900), "+", fill=(255,255,255), font=font_title)
-        draw.text((200, 1000), "Habla con tus documentos", fill=(255,255,255), font=font_title)
-    
+        crear_icono_drive(draw, 540, 450, 180)
+        draw.text((470, 680), "+", fill=(255,255,255), font=font_title)
+        crear_icono_claude(draw, 540, 900, 200)
+        # Texto centrado grande
+        texto = "Habla con tus"
+        bbox = draw.textbbox((0,0), texto, font=font_title)
+        x = (1080 - (bbox[2]-bbox[0])) // 2
+        draw.text((x, 1150), texto, fill=(255,255,255), font=font_title)
+        texto2 = "documentos"
+        bbox2 = draw.textbbox((0,0), texto2, font=font_title)
+        x2 = (1080 - (bbox2[2]-bbox2[0])) // 2
+        draw.text((x2, 1300), texto2, fill=(255,255,255), font=font_title)
+
     # SEGMENTO 2: Problema - Archivos
     elif segmento == 2:
-        draw.text((300, 200), "📁 20+ documentos", fill=(200,200,200), font=font_title)
-        y_pos = 350
+        texto = "20+ documentos"
+        bbox = draw.textbbox((0,0), texto, font=font_title)
+        x = (1080 - (bbox[2]-bbox[0])) // 2
+        draw.text((x, 200), texto, fill=(200,200,200), font=font_title)
+        y_pos = 450
         for i in range(5):
-            crear_icono_pdf(draw, 200, y_pos + i*120, 35)
-            draw.text((280, y_pos + i*120 - 15), f"informe_{i+1}.pdf", fill=(180,180,180), font=font_text)
-        draw.text((250, 1000), "¿Días leyendo?", fill=(248,81,73), font=font_title)
-    
+            crear_icono_pdf(draw, 200, y_pos + i*200, 60)
+            draw.text((300, y_pos + i*200 - 25), f"informe_{i+1}.pdf", fill=(180,180,180), font=font_text)
+        pregunta = "¿Días leyendo?"
+        bbox = draw.textbbox((0,0), pregunta, font=font_title)
+        x = (1080 - (bbox[2]-bbox[0])) // 2
+        draw.text((x, 1550), pregunta, fill=(248,81,73), font=font_title)
+
     # SEGMENTO 3: Solución - Interfaz
     elif segmento == 3:
-        # Caja de chat
-        draw.rounded_rectangle([100, 400, 980, 800], radius=20, fill=(22, 27, 34), outline=(48,54,61), width=2)
-        draw.text((150, 450), "Tú:", fill=(139,148,158), font=font_text)
-        draw.text((150, 500), "Analiza mis documentos del", fill=(255,255,255), font=font_text)
-        draw.text((150, 540), "último trimestre", fill=(255,255,255), font=font_text)
-        
+        # Caja de chat más grande
+        draw.rounded_rectangle([60, 350, 1020, 950], radius=30, fill=(22, 27, 34), outline=(48,54,61), width=3)
+        draw.text((120, 400), "Tú:", fill=(139,148,158), font=font_text)
+        draw.text((120, 490), "Analiza mis", fill=(255,255,255), font=font_text)
+        draw.text((120, 580), "documentos del", fill=(255,255,255), font=font_text)
+        draw.text((120, 670), "último trimestre", fill=(255,255,255), font=font_text)
+
         # Respuesta de Claude
-        draw.text((150, 650), "Claude:", fill=(229,112,53), font=font_text)
-        draw.text((150, 700), "Analizando... ✓", fill=(63,185,80), font=font_text)
-        
-        crear_icono_claude(draw, 900, 700, 50)
-    
+        draw.rounded_rectangle([60, 1020, 1020, 1500], radius=30, fill=(22, 27, 34), outline=(229,112,53), width=3)
+        draw.text((120, 1070), "Claude:", fill=(229,112,53), font=font_text)
+        draw.text((120, 1180), "Analizando...", fill=(63,185,80), font=font_title)
+        crear_icono_claude(draw, 900, 1300, 80)
+
     # SEGMENTO 4: Resultados - Tarjetas
     elif segmento == 4:
         tarjetas = [
-            ("📈 VENTAS", "+23% crecimiento", (35,134,54)),
-            ("⚠️ ALERTA", "3 contratos expiran", (248,81,73)),
-            ("💡 TIP", "Enfocarse en B2B", (229,112,53))
+            ("VENTAS", "+23%", (35,134,54)),
+            ("ALERTA", "3 contratos", (248,81,73)),
+            ("TIP", "Enfoque B2B", (229,112,53))
         ]
-        y_start = 300
+        y_start = 250
         for i, (titulo, desc, color) in enumerate(tarjetas):
-            y = y_start + i * 280
-            # Borde izquierdo de color
-            draw.rounded_rectangle([100, y, 980, y+200], radius=15, fill=(22,27,34))
-            draw.rectangle([100, y, 115, y+200], fill=color)
-            draw.text((150, y+30), titulo, fill=(255,255,255), font=font_title)
-            draw.text((150, y+100), desc, fill=(201,209,217), font=font_text)
-    
+            y = y_start + i * 420
+            draw.rounded_rectangle([80, y, 1000, y+350], radius=25, fill=(22,27,34))
+            draw.rectangle([80, y, 105, y+350], fill=color)
+            draw.text((140, y+40), titulo, fill=(255,255,255), font=font_title)
+            draw.text((140, y+180), desc, fill=(201,209,217), font=font_title)
+
     # SEGMENTO 5: CTA
     else:
-        draw.text((350, 600), "🚀 PRUEBA AHORA", fill=(229,112,53), font=font_title)
-        # Botón
-        draw.rounded_rectangle([340, 800, 740, 920], radius=50, fill=(255,255,255))
-        draw.text((400, 840), "SUSCRIBIRSE", fill=(13,17,23), font=font_title)
-        draw.text((300, 1100), "👍 Like  💬 Comenta  🔄 Comparte", fill=(139,148,158), font=font_text)
+        texto = "PRUEBA AHORA"
+        bbox = draw.textbbox((0,0), texto, font=font_title)
+        x = (1080 - (bbox[2]-bbox[0])) // 2
+        draw.text((x, 500), texto, fill=(229,112,53), font=font_title)
+        # Botón grande
+        draw.rounded_rectangle([200, 800, 880, 1000], radius=50, fill=(255,255,255))
+        suscribirse = "SUSCRIBIRSE"
+        bbox = draw.textbbox((0,0), suscribirse, font=font_title)
+        x = (1080 - (bbox[2]-bbox[0])) // 2
+        draw.text((x, 850), suscribirse, fill=(13,17,23), font=font_title)
+        cta = "Like · Comenta · Comparte"
+        bbox = draw.textbbox((0,0), cta, font=font_text)
+        x = (1080 - (bbox[2]-bbox[0])) // 2
+        draw.text((x, 1200), cta, fill=(139,148,158), font=font_text)
     
     return img
 
