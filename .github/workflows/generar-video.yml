@@ -1,0 +1,86 @@
+name: Generar Video Final
+
+on:
+  workflow_dispatch:
+
+jobs:
+  video:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ffmpeg
+        pip install Pillow
+    
+    - name: Generar frames y video
+      run: |
+        python3 << 'EOF'
+        import os
+        from PIL import Image, ImageDraw, ImageFont
+        import subprocess
+        
+        os.makedirs('output', exist_ok=True)
+        os.makedirs('frames_temp', exist_ok=True)
+        
+        # Generar frames con fondo naranja y texto blanco
+        W, H = 720, 1280
+        FRAMES_TEXT = [
+            (1, "AHORRA", "40 HORAS"),
+            (2, "PROBLEMA", "20+ PDFs"),
+            (3, "SOLUCIÓN", "1 CLICK"),
+            (4, "RESULTADO", "+23%"),
+            (5, "GRATIS", "PRUEBA"),
+        ]
+        
+        frame_files = []
+        for num, palabra, sub in FRAMES_TEXT:
+            img = Image.new('RGB', (W, H), (230, 100, 30))  # Naranja Claude
+            draw = ImageDraw.Draw(img)
+            
+            try:
+                font_big = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 180)
+                font_sub = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 80)
+            except:
+                font_big = font_sub = ImageFont.load_default()
+            
+            # Palabra principal
+            draw.text((80, 450), palabra, fill=(255,255,255), font=font_big)
+            # Subtítulo
+            draw.text((80, 700), sub, fill=(255,200,150), font=font_sub)
+            # Número
+            draw.text((30, 30), f"0{num}", fill=(255,255,255), font=font_sub)
+            
+            # Guardar múltiples copias para duración
+            for i in range(30):  # 1 segundo a 30fps
+                path = f"frames_temp/frame_{num:02d}_{i:02d}.png"
+                img.save(path)
+                frame_files.append(path)
+        
+        print(f"✅ {len(frame_files)} frames generados")
+        
+        # Crear video con ffmpeg
+        cmd = "ffmpeg -y -framerate 30 -i frames_temp/frame_%02d_%02d.png -c:v libx264 -pix_fmt yuv420p output/video_final_emergencia.mp4"
+        subprocess.run(cmd, shell=True, check=True)
+        
+        # Limpiar
+        import shutil
+        shutil.rmtree('frames_temp')
+        
+        print("✅ Video generado: output/video_final_emergencia.mp4")
+        EOF
+    
+    - name: Subir artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: video-emergencia
+        path: output/video_final_emergencia.mp4
+    
+    - name: Commit
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add output/
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Add: Video emergencia generado" && git push)

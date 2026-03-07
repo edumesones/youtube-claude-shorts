@@ -1,0 +1,54 @@
+name: Generar Pantallazos Emergencia
+
+on:
+  workflow_dispatch:
+
+jobs:
+  generar:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+    
+    - name: Instalar dependencias
+      run: pip install Pillow
+    
+    - name: Generar frames emergencia
+      run: |
+        python3 << 'EOF'
+        from PIL import Image, ImageDraw, ImageFont
+        import os
+        os.makedirs('pantallazos', exist_ok=True)
+        
+        W, H = 720, 1280
+        FRAMES = [(1, "AHORRA"), (2, "40H"), (3, "1 CLICK"), (4, "+23%"), (5, "GRATIS")]
+        
+        for num, texto in FRAMES:
+            img = Image.new('RGB', (W, H), (230, 100, 30))  # Naranja
+            draw = ImageDraw.Draw(img)
+            
+            try:
+                font = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf", 150)
+            except:
+                font = ImageFont.load_default()
+            
+            # Texto blanco en coordenadas fijas
+            draw.text((100, 500), texto, fill=(255,255,255), font=font)
+            draw.text((20, 20), str(num), fill=(255,255,255), font=font)
+            
+            img.save(f"pantallazos/frame_{num:02d}_emergencia.png", "PNG")
+            print(f"✅ Frame {num}: {texto}")
+        
+        print("\n✅ FRAMES EMERGENCIA LISTOS")
+        EOF
+    
+    - name: Commit y push
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "actions@github.com"
+        git add pantallazos/
+        git diff --quiet && git diff --staged --quiet || (git commit -m "Add: Frames emergencia fondo naranja" && git push)
