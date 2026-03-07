@@ -2,40 +2,34 @@
 Renderiza videos de YouTube Shorts usando MoviePy.
 Versión: Gratis (MoviePy + FFmpeg)
 """
-from moviepy.editor import *
-from moviepy.video.fx.all import fadein, fadeout
+from moviepy import *
+from moviepy.video.fx import FadeIn, FadeOut
 import os
 from typing import List, Dict, Optional
 
 
 def create_text_clip(text: str, duration: float, position: str = "center",
                      fontsize: int = 70, color: str = "white",
-                     start_time: float = 0) -> TextClip:
+                     start_time: float = 0):
     """Crea un clip de texto animado."""
     
     txt_clip = TextClip(
-        text,
-        fontsize=fontsize,
+        text=text,
+        font_size=fontsize,
         color=color,
-        font="DejaVu-Sans-Bold",
         stroke_color="black",
         stroke_width=2,
-        method="caption",
-        size=(900, None),  # Ancho fijo, alto automático
-        align="center"
-    ).set_duration(duration).set_start(start_time)
+        size=(900, None),
+        text_align="center"
+    ).with_duration(duration).with_start(start_time)
     
     # Posicionar
     if position == "center":
-        txt_clip = txt_clip.set_position("center")
+        txt_clip = txt_clip.with_position("center")
     elif position == "top":
-        txt_clip = txt_clip.set_position(("center", 200))
+        txt_clip = txt_clip.with_position(("center", 200))
     elif position == "bottom":
-        txt_clip = txt_clip.set_position(("center", 1500))
-    
-    # Añadir animación de entrada (fade in)
-    txt_clip = fadein(txt_clip, 0.3)
-    txt_clip = fadeout(txt_clip, 0.3)
+        txt_clip = txt_clip.with_position(("center", 1500))
     
     return txt_clip
 
@@ -72,7 +66,7 @@ def render_short_video(
         # 2. Crear fondo
         # Opción A: Color sólido degradado
         bg = ColorClip(size=(1080, 1920), color=(20, 20, 40))
-        bg = bg.set_duration(duration)
+        bg = bg.with_duration(duration)
         
         # Opción B: Usar thumbnail como fondo (blur)
         # if os.path.exists(thumbnail_path):
@@ -118,19 +112,19 @@ def render_short_video(
         
         # 5. Añadir watermark/logo
         watermark = TextClip(
-            "@ClaudeTipsES",
-            fontsize=40,
+            text="@ClaudeTipsES",
+            font_size=40,
             color="white",
             stroke_color="black",
             stroke_width=1
-        ).set_duration(duration).set_position((20, 20))
+        ).with_duration(duration).with_position((20, 20))
         clips.append(watermark)
         
         # 6. Combinar todos los clips
         video = CompositeVideoClip(clips, size=(1080, 1920))
         
         # 7. Añadir audio
-        video = video.set_audio(audio)
+        video = video.with_audio(audio)
         
         # 8. Exportar
         print("   Exportando... (esto puede tardar)")
