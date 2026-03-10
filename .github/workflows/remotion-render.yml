@@ -10,35 +10,21 @@ on:
 jobs:
   render:
     name: Render Video
-    runs-on: ubuntu-22.04
-    
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/remotion-dev/remotion:latest
+      
     steps:
       - name: 📥 Checkout code
         uses: actions/checkout@v4
 
-      - name: ⚙️ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-          cache: 'npm'
-          cache-dependency-path: remotion/package-lock.json
-
-      - name: 🔄 Install system dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y chromium-browser
-
-      - name: 📦 Install npm dependencies
+      - name: 📦 Install dependencies
         working-directory: remotion
         run: npm ci
 
       - name: 🎬 Render video
         working-directory: remotion
-        run: npx remotion render src/index.tsx Video out/video.mp4
-        env:
-          REMOTION_CONCURRENCY: 2
-          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
-          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
+        run: remotion render src/index.tsx Video out/video.mp4
 
       - name: 📤 Upload video artifact
         uses: actions/upload-artifact@v4

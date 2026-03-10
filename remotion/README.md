@@ -82,5 +82,4 @@ El preview usa mucha CPU. Es normal, el render final es eficiente.
 
 ---
 
-**Estado:** Workflow activado ✅
-**Última ejecución:** Renderizando...
+**Estado:** Workflow usando container oficial de Remotion ✅
