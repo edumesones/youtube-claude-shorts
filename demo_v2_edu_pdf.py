@@ -15,7 +15,7 @@ FONT = "fonts/Roboto-Bold.ttf"
 
 # CONFIGURACIÓN ELEVENLABS - VOZ EDU
 ELEVENLABS_API_KEY = os.environ.get('ELEVENLABS_API_KEY', '')
-VOICE_ID = 'edus'
+VOICE_ID = 'DJqL9GvhCdRJNarEEzXU'  # ID real de voz 'edus'
 
 def generar_voz_edus(texto, output_path):
     """Genera audio con voz clonada de Edu"""
