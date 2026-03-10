@@ -6,16 +6,11 @@ on:
     paths:
       - 'remotion/**'
   workflow_dispatch:
-    inputs:
-      composition:
-        description: 'Composition to render'
-        default: 'Video'
-        type: string
 
 jobs:
   render:
     name: Render Video
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     
     steps:
       - name: 📥 Checkout code
@@ -28,37 +23,22 @@ jobs:
           cache: 'npm'
           cache-dependency-path: remotion/package-lock.json
 
-      - name: 🔄 Install Chrome dependencies
+      - name: 🔄 Install system dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y \
-            libnss3 \
-            libnssutil3 \
-            libnspr4 \
-            libatk1.0-0 \
-            libatk-bridge2.0-0 \
-            libcups2 \
-            libdrm2 \
-            libxkbcommon0 \
-            libxcomposite1 \
-            libxdamage1 \
-            libxfixes3 \
-            libxrandr2 \
-            libgbm1 \
-            libpango-1.0-0 \
-            libcairo2 \
-            libasound2
+          sudo apt-get install -y chromium-browser
 
-      - name: 📦 Install dependencies
+      - name: 📦 Install npm dependencies
         working-directory: remotion
         run: npm ci
 
       - name: 🎬 Render video
         working-directory: remotion
-        run: |
-          npx remotion render src/index.tsx Video out/video.mp4 --log=verbose
+        run: npx remotion render src/index.tsx Video out/video.mp4
         env:
           REMOTION_CONCURRENCY: 2
+          PUPPETEER_SKIP_CHROMIUM_DOWNLOAD: true
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/chromium-browser
 
       - name: 📤 Upload video artifact
         uses: actions/upload-artifact@v4
