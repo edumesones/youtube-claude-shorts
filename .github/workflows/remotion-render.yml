@@ -33,10 +33,20 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y \
             libnss3 \
+            libnssutil3 \
+            libnspr4 \
+            libatk1.0-0 \
             libatk-bridge2.0-0 \
-            libxss1 \
-            libgtk-3-0 \
-            libgbm-dev \
+            libcups2 \
+            libdrm2 \
+            libxkbcommon0 \
+            libxcomposite1 \
+            libxdamage1 \
+            libxfixes3 \
+            libxrandr2 \
+            libgbm1 \
+            libpango-1.0-0 \
+            libcairo2 \
             libasound2
 
       - name: 📦 Install dependencies
@@ -56,15 +66,3 @@ jobs:
           name: remotion-video
           path: remotion/out/video.mp4
           retention-days: 30
-
-      - name: 📝 Comment on commit
-        if: github.event_name == 'push'
-        uses: actions/github-script@v7
-        with:
-          script: |
-            github.rest.repos.createCommitComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              commit_sha: context.sha,
-              body: '🎬 Video renderizado con Remotion disponible en los artifacts'
-            })
