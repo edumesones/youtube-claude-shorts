@@ -79,3 +79,7 @@ El preview usa mucha CPU. Es normal, el render final es eficiente.
 ---
 
 *Generado para Edu Mesones - Marzo 2024*
+
+---
+
+**Estado:** Workflow activado para renderizado automático ✅
