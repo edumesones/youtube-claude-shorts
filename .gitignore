@@ -1,0 +1,40 @@
+# Dependencies
+node_modules/
+remotion/node_modules/
+
+# Remotion Chrome binaries (too large for GitHub)
+*.remotion/chrome-headless-shell/
+remotion/node_modules/.remotion/
+
+# Output
+out/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# Videos (generated)
+*.mp4
+*.mov
+*.avi
+
+# Audio
+*.mp3
+*.wav
+*.aac
